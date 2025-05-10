@@ -1,171 +1,628 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
-  <title>Impostore</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #1a1a2e; color: white; text-align: center; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .panel { background: #16213e; padding: 15px; border-radius: 10px; margin: 10px 0; }
-    input, button { padding: 10px; margin: 5px; border: none; border-radius: 5px; }
-    button { background: #f05454; color: white; cursor: pointer; }
-    #playersList, #votingList { list-style: none; padding: 0; }
-    #playersList li, #votingList li { padding: 8px; margin: 5px 0; background: #0f3460; border-radius: 5px; }
-    #gameSection { display: none; }
-    #timer { font-size: 24px; margin: 10px 0; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impostore - Gioco Musicale</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1a2e;
+            color: #e6e6e6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: #16213e;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #f95959;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        button {
+            background-color: #f95959;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #d83f3f;
+        }
+        
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        
+        input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background-color: #0f3460;
+            color: white;
+            width: 100%;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+        
+        .player-list {
+            margin: 20px 0;
+            border: 1px solid #555;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #0f3460;
+        }
+        
+        .player-item {
+            padding: 8px;
+            border-bottom: 1px solid #555;
+        }
+        
+        .player-item:last-child {
+            border-bottom: none;
+        }
+        
+        .game-area {
+            text-align: center;
+        }
+        
+        #audioPlayer {
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        .voting-options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .vote-btn {
+            background-color: #0f3460;
+            padding: 8px 15px;
+        }
+        
+        .vote-btn:hover {
+            background-color: #1a4b8c;
+        }
+        
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #0f3460;
+            border-radius: 5px;
+        }
+        
+        .admin-controls {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #555;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Lobby -->
-    <div id="lobbySection">
-      <h1>IMPOSTORE</h1>
-      <div class="panel">
-        <button id="createBtn">Crea Stanza</button>
-        <div id="roomCode" style="font-size: 24px; margin: 10px 0;"></div>
-      </div>
-      <div class="panel">
-        <input id="joinCodeInput" placeholder="Codice stanza">
-        <input id="playerNameInput" placeholder="Il tuo nome">
-        <button id="joinBtn">Unisciti</button>
-      </div>
-      <div class="panel">
-        <h3>Giocatori:</h3>
-        <ul id="playersList"></ul>
-        <button id="startBtn" disabled>Avvia Gioco</button>
-      </div>
+    <div class="container">
+        <h1>Impostore</h1>
+        
+        <!-- Schermata iniziale -->
+        <div id="homeScreen" class="screen active">
+            <button id="createRoomBtn">Crea Stanza</button>
+            <button id="joinRoomBtn">Unisciti a Stanza</button>
+        </div>
+        
+        <!-- Crea stanza -->
+        <div id="createRoomScreen" class="screen">
+            <h2>Crea una nuova stanza</h2>
+            <input type="text" id="hostName" placeholder="Il tuo nome">
+            <button id="startRoomBtn">Crea Stanza</button>
+            <div id="roomCodeDisplay" style="display: none;">
+                <p>Codice stanza: <strong id="roomCode"></strong></p>
+                <p>Condividi questo codice con gli amici!</p>
+            </div>
+        </div>
+        
+        <!-- Unisciti a stanza -->
+        <div id="joinRoomScreen" class="screen">
+            <h2>Unisciti a una stanza</h2>
+            <input type="text" id="playerName" placeholder="Il tuo nome">
+            <input type="text" id="roomCodeInput" placeholder="Codice stanza">
+            <button id="joinGameBtn">Unisciti</button>
+        </div>
+        
+        <!-- Lobby -->
+        <div id="lobbyScreen" class="screen">
+            <h2>Lobby - <span id="lobbyRoomCode"></span></h2>
+            <div class="player-list" id="playerList"></div>
+            <div id="hostControls" class="admin-controls">
+                <button id="startGameBtn">Inizia Gioco</button>
+            </div>
+        </div>
+        
+        <!-- Gioco -->
+        <div id="gameScreen" class="screen">
+            <div class="game-area">
+                <h2>Round <span id="roundNumber">1</span></h2>
+                <p id="gameStatus">In attesa che la partita inizi...</p>
+                <audio id="audioPlayer" controls></audio>
+                <div id="votingSection" style="display: none;">
+                    <h3>Chi è l'impostore?</h3>
+                    <div class="voting-options" id="votingOptions"></div>
+                </div>
+                <div class="results" id="resultsSection" style="display: none;"></div>
+            </div>
+        </div>
     </div>
 
-    <!-- Gioco -->
-    <div id="gameSection">
-      <h2 id="roleText">Ruolo: Normale</h2>
-      <div id="timer">30</div>
-      <audio id="music" controls></audio>
-      <div id="votingSection" style="display: none;">
-        <h3>Vota l'impostore:</h3>
-        <ul id="votingList"></ul>
-        <button id="voteBtn" disabled>Conferma</button>
-      </div>
-    </div>
-  </div>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        // Configurazione iniziale
+        const screens = {
+            home: document.getElementById('homeScreen'),
+            createRoom: document.getElementById('createRoomScreen'),
+            joinRoom: document.getElementById('joinRoomScreen'),
+            lobby: document.getElementById('lobbyScreen'),
+            game: document.getElementById('gameScreen')
+        };
 
-  <script>
-    // ===================== BACKEND SIMULATO =====================
-    const fakeBackend = {
-      rooms: {},
-      createRoom() {
-        const code = Math.random().toString(36).substring(2, 6).toUpperCase();
-        this.rooms[code] = { players: [], impostor: null };
-        return code;
-      },
-      joinRoom(code, name) {
-        if (!this.rooms[code]) return false;
-        const id = 'player-' + Math.random().toString(36).substring(2, 9);
-        this.rooms[code].players.push({ id, name });
-        return { id, room: this.rooms[code] };
-      },
-      startGame(code) {
-        const room = this.rooms[code];
-        const impostorIndex = Math.floor(Math.random() * room.players.length);
-        room.impostor = room.players[impostorIndex].id;
-        return room.impostor;
-      }
-    };
+        // Elementi UI
+        const createRoomBtn = document.getElementById('createRoomBtn');
+        const joinRoomBtn = document.getElementById('joinRoomBtn');
+        const startRoomBtn = document.getElementById('startRoomBtn');
+        const joinGameBtn = document.getElementById('joinGameBtn');
+        const startGameBtn = document.getElementById('startGameBtn');
+        const hostNameInput = document.getElementById('hostName');
+        const playerNameInput = document.getElementById('playerName');
+        const roomCodeInput = document.getElementById('roomCodeInput');
+        const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+        const roomCodeSpan = document.getElementById('roomCode');
+        const lobbyRoomCode = document.getElementById('lobbyRoomCode');
+        const playerList = document.getElementById('playerList');
+        const gameStatus = document.getElementById('gameStatus');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const votingSection = document.getElementById('votingSection');
+        const votingOptions = document.getElementById('votingOptions');
+        const resultsSection = document.getElementById('resultsSection');
+        const roundNumber = document.getElementById('roundNumber');
 
-    // ===================== FRONTEND =====================
-    let currentRoom = null;
-    let playerId = null;
-    let isImpostor = false;
+        // Stato del gioco
+        let socket;
+        let isHost = false;
+        let currentPlayers = [];
+        let myName = '';
+        let roomCode = '';
+        let isImpostor = false;
+        let gameInterval;
 
-    // Elementi DOM
-    const lobbySection = document.getElementById('lobbySection');
-    const gameSection = document.getElementById('gameSection');
-    const createBtn = document.getElementById('createBtn');
-    const joinBtn = document.getElementById('joinBtn');
-    const startBtn = document.getElementById('startBtn');
-
-    // Creazione stanza
-    createBtn.addEventListener('click', () => {
-      const code = fakeBackend.createRoom();
-      playerId = 'host-' + Math.random().toString(36).substring(2, 9);
-      currentRoom = code;
-      document.getElementById('roomCode').textContent = `Codice: ${code}`;
-      startBtn.disabled = false;
-      updatePlayersList();
-    });
-
-    // Unione a stanza
-    joinBtn.addEventListener('click', () => {
-      const code = document.getElementById('joinCodeInput').value;
-      const name = document.getElementById('playerNameInput').value;
-      const result = fakeBackend.joinRoom(code, name);
-      if (!result) return alert('Stanza non trovata!');
-      
-      playerId = result.id;
-      currentRoom = code;
-      updatePlayersList();
-    });
-
-    // Avvio gioco
-    startBtn.addEventListener('click', () => {
-      const impostorId = fakeBackend.startGame(currentRoom);
-      isImpostor = playerId === impostorId;
-      
-      lobbySection.style.display = 'none';
-      gameSection.style.display = 'block';
-      document.getElementById('roleText').textContent = 
-        isImpostor ? 'Ruolo: IMPOSTORE!' : 'Ruolo: Normale';
-      
-      startMusic();
-      startTimer();
-    });
-
-    // Funzioni di gioco
-    function startMusic() {
-      const music = document.getElementById('music');
-      music.src = isImpostor ? 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' 
-                            : 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3';
-      music.play();
-    }
-
-    function startTimer() {
-      let time = 30;
-      const timer = setInterval(() => {
-        document.getElementById('timer').textContent = time--;
-        if (time < 0) {
-          clearInterval(timer);
-          startVoting();
+        // Funzioni di utilità
+        function showScreen(screenId) {
+            Object.values(screens).forEach(screen => {
+                screen.classList.remove('active');
+            });
+            screens[screenId].classList.add('active');
         }
-      }, 1000);
-    }
 
-    function startVoting() {
-      document.getElementById('music').pause();
-      document.getElementById('votingSection').style.display = 'block';
-      // Popola lista voti (semplificata)
-      const room = fakeBackend.rooms[currentRoom];
-      const votingList = document.getElementById('votingList');
-      votingList.innerHTML = room.players
-        .map(p => `<li onclick="selectPlayer('${p.id}')">${p.name}</li>`)
-        .join('');
-    }
+        function generateRoomCode() {
+            return Math.random().toString(36).substr(2, 5).toUpperCase();
+        }
 
-    function selectPlayer(id) {
-      voteSelection = id;
-      document.getElementById('voteBtn').disabled = false;
-    }
+        function updatePlayerList(players) {
+            currentPlayers = players;
+            playerList.innerHTML = '';
+            players.forEach(player => {
+                const playerItem = document.createElement('div');
+                playerItem.className = 'player-item';
+                playerItem.textContent = player.name + (player.isHost ? ' (Host)' : '');
+                playerList.appendChild(playerItem);
+            });
+        }
 
-    // Aggiorna lista giocatori
-    function updatePlayersList() {
-      if (!currentRoom) return;
-      const room = fakeBackend.rooms[currentRoom];
-      const playersList = document.getElementById('playersList');
-      playersList.innerHTML = room.players
-        .map(p => `<li>${p.name}</li>`)
-        .join('');
-    }
+        // Connessione Socket.io
+        function connectToServer() {
+            socket = io();
 
-    // Esposto alla global scope per l'HTML
-    window.selectPlayer = selectPlayer;
-  </script>
+            socket.on('connect', () => {
+                console.log('Connesso al server');
+            });
+
+            socket.on('roomCreated', (code) => {
+                roomCode = code;
+                roomCodeSpan.textContent = code;
+                lobbyRoomCode.textContent = code;
+                roomCodeDisplay.style.display = 'block';
+                showScreen('lobby');
+            });
+
+            socket.on('playerJoined', (players) => {
+                updatePlayerList(players);
+            });
+
+            socket.on('playerLeft', (players) => {
+                updatePlayerList(players);
+            });
+
+            socket.on('gameStarted', ({ impostor }) => {
+                isImpostor = impostor === myName;
+                showScreen('game');
+                startRound(1);
+            });
+
+            socket.on('startMusic', ({ url, isDifferent }) => {
+                if (isImpostor && isDifferent) {
+                    gameStatus.textContent = 'Sei l\'impostore! Ascolta attentamente...';
+                } else {
+                    gameStatus.textContent = 'Ascolta la canzone...';
+                }
+                audioPlayer.src = url;
+                audioPlayer.play();
+                
+                // Dopo 30 secondi, ferma la musica e inizia il voto
+                setTimeout(() => {
+                    audioPlayer.pause();
+                    startVoting();
+                }, 30000);
+            });
+
+            socket.on('votingStarted', () => {
+                startVoting();
+            });
+
+            socket.on('voteResult', ({ votedPlayer, isImpostor }) => {
+                showResults(votedPlayer, isImpostor);
+            });
+
+            socket.on('gameOver', ({ winner }) => {
+                if (winner === 'impostor') {
+                    resultsSection.innerHTML = '<h3>L\'impostore ha vinto!</h3>';
+                } else {
+                    resultsSection.innerHTML = '<h3>Gli innocenti hanno vinto!</h3>';
+                }
+                resultsSection.style.display = 'block';
+                
+                setTimeout(() => {
+                    showScreen('home');
+                }, 5000);
+            });
+        }
+
+        function startRound(round) {
+            roundNumber.textContent = round;
+            votingSection.style.display = 'none';
+            resultsSection.style.display = 'none';
+            gameStatus.textContent = 'Preparati... la canzone inizierà presto!';
+            
+            if (isHost) {
+                // Solo l'host può avviare il round
+                setTimeout(() => {
+                    socket.emit('startRound', { round });
+                }, 3000);
+            }
+        }
+
+        function startVoting() {
+            gameStatus.textContent = 'Vota chi pensi sia l\'impostore!';
+            votingOptions.innerHTML = '';
+            
+            currentPlayers.forEach(player => {
+                if (player.name !== myName) {
+                    const voteBtn = document.createElement('button');
+                    voteBtn.className = 'vote-btn';
+                    voteBtn.textContent = player.name;
+                    voteBtn.onclick = () => {
+                        socket.emit('castVote', { player: player.name });
+                        votingOptions.innerHTML = `<p>Hai votato per ${player.name}. Attendere risultati...</p>`;
+                    };
+                    votingOptions.appendChild(voteBtn);
+                }
+            });
+            
+            votingSection.style.display = 'block';
+        }
+
+        function showResults(votedPlayer, wasImpostor) {
+            let resultText;
+            if (wasImpostor) {
+                resultText = `<p>${votedPlayer} era l'impostore! Gioco terminato.</p>`;
+                socket.emit('endGame', { winner: 'innocents' });
+            } else {
+                resultText = `<p>${votedPlayer} non era l'impostore! Il gioco continua...</p>`;
+                
+                // Avvia un nuovo round dopo 5 secondi
+                setTimeout(() => {
+                    startRound(parseInt(roundNumber.textContent) + 1);
+                }, 5000);
+            }
+            
+            resultsSection.innerHTML = resultText;
+            resultsSection.style.display = 'block';
+            votingSection.style.display = 'none';
+        }
+
+        // Gestori eventi UI
+        createRoomBtn.addEventListener('click', () => {
+            showScreen('createRoom');
+        });
+
+        joinRoomBtn.addEventListener('click', () => {
+            showScreen('joinRoom');
+        });
+
+        startRoomBtn.addEventListener('click', () => {
+            const name = hostNameInput.value.trim();
+            if (name) {
+                myName = name;
+                isHost = true;
+                connectToServer();
+                socket.emit('createRoom', { hostName: name });
+                document.getElementById('hostControls').style.display = 'block';
+            } else {
+                alert('Inserisci il tuo nome');
+            }
+        });
+
+        joinGameBtn.addEventListener('click', () => {
+            const name = playerNameInput.value.trim();
+            const code = roomCodeInput.value.trim().toUpperCase();
+            
+            if (name && code) {
+                myName = name;
+                isHost = false;
+                roomCode = code;
+                connectToServer();
+                socket.emit('joinRoom', { playerName: name, roomCode: code });
+                document.getElementById('hostControls').style.display = 'none';
+            } else {
+                alert('Inserisci nome e codice stanza');
+            }
+        });
+
+        startGameBtn.addEventListener('click', () => {
+            if (currentPlayers.length >= 3) {
+                socket.emit('startGame');
+            } else {
+                alert('Servono almeno 3 giocatori per iniziare');
+            }
+        });
+
+        // Server Node.js integrato
+        const serverCode = `
+        const express = require('express');
+        const http = require('http');
+        const socketIo = require('socket.io');
+        const path = require('path');
+        
+        const app = express();
+        const server = http.createServer(app);
+        const io = socketIo(server);
+        
+        // Servi i file statici
+        app.use(express.static(path.join(__dirname, 'public')));
+        
+        // Gestione delle stanze
+        const rooms = {};
+        const songs = [
+            'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+            'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+            'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+            'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+            'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3'
+        ];
+        
+        class GameRoom {
+            constructor(code, host) {
+                this.code = code;
+                this.players = [host];
+                this.host = host.socketId;
+                this.gameState = 'waiting'; // waiting, playing, voting
+                this.currentRound = 0;
+                this.impostor = null;
+            }
+            
+            addPlayer(player) {
+                this.players.push(player);
+            }
+            
+            removePlayer(socketId) {
+                this.players = this.players.filter(p => p.socketId !== socketId);
+                
+                // Se l'host lascia, assegna un nuovo host
+                if (socketId === this.host && this.players.length > 0) {
+                    this.host = this.players[0].socketId;
+                    this.players[0].isHost = true;
+                }
+                
+                return this.players;
+            }
+            
+            startGame() {
+                this.gameState = 'playing';
+                this.currentRound = 1;
+                // Scegli un impostore casuale
+                const randomIndex = Math.floor(Math.random() * this.players.length);
+                this.impostor = this.players[randomIndex].name;
+                
+                return this.impostor;
+            }
+            
+            startRound(round) {
+                this.currentRound = round;
+                const randomSongIndex = Math.floor(Math.random() * songs.length);
+                const songUrl = songs[randomSongIndex];
+                
+                return {
+                    url: songUrl,
+                    isDifferent: true // Per l'impostore sarà diversa
+                };
+            }
+        }
+        
+        io.on('connection', (socket) => {
+            console.log('Nuovo client connesso:', socket.id);
+            
+            socket.on('createRoom', ({ hostName }) => {
+                const code = generateRoomCode();
+                const host = {
+                    socketId: socket.id,
+                    name: hostName,
+                    isHost: true
+                };
+                
+                const room = new GameRoom(code, host);
+                rooms[code] = room;
+                
+                socket.join(code);
+                socket.emit('roomCreated', code);
+                
+                console.log(\`Stanza \${code} creata da \${hostName}\`);
+            });
+            
+            socket.on('joinRoom', ({ playerName, roomCode }) => {
+                if (!rooms[roomCode]) {
+                    socket.emit('error', 'Stanza non trovata');
+                    return;
+                }
+                
+                const player = {
+                    socketId: socket.id,
+                    name: playerName,
+                    isHost: false
+                };
+                
+                rooms[roomCode].addPlayer(player);
+                socket.join(roomCode);
+                
+                // Notifica tutti i giocatori nella stanza
+                io.to(roomCode).emit('playerJoined', rooms[roomCode].players);
+                
+                console.log(\`\${playerName} si è unito alla stanza \${roomCode}\`);
+            });
+            
+            socket.on('startGame', () => {
+                const room = findRoomBySocket(socket.id);
+                if (!room || room.host !== socket.id) return;
+                
+                const impostor = room.startGame();
+                io.to(room.code).emit('gameStarted', { impostor });
+                
+                console.log(\`Gioco iniziato in stanza \${room.code}, impostore: \${impostor}\`);
+            });
+            
+            socket.on('startRound', ({ round }) => {
+                const room = findRoomBySocket(socket.id);
+                if (!room || room.host !== socket.id) return;
+                
+                const songInfo = room.startRound(round);
+                
+                // Invia la stessa canzone a tutti tranne all'impostore
+                room.players.forEach(player => {
+                    if (player.name === room.impostor) {
+                        io.to(player.socketId).emit('startMusic', {
+                            url: songs[(songs.indexOf(songInfo.url) + 1) % songs.length], // Canzone diversa
+                            isDifferent: true
+                        });
+                    } else {
+                        io.to(player.socketId).emit('startMusic', {
+                            url: songInfo.url,
+                            isDifferent: false
+                        });
+                    }
+                });
+                
+                console.log(\`Round \${round} iniziato in stanza \${room.code}\`);
+            });
+            
+            socket.on('castVote', ({ player }) => {
+                const room = findRoomBySocket(socket.id);
+                if (!room) return;
+                
+                // Qui dovresti implementare la logica per raccogliere i voti
+                // Per semplicità, supponiamo che il primo voto ricevuto determini il risultato
+                
+                const isImpostor = player === room.impostor;
+                io.to(room.code).emit('voteResult', {
+                    votedPlayer: player,
+                    isImpostor: isImpostor
+                });
+                
+                if (isImpostor) {
+                    room.gameState = 'waiting';
+                    io.to(room.code).emit('gameOver', { winner: 'innocents' });
+                }
+                
+                console.log(\`Voto ricevuto in stanza \${room.code}: \${player} (Impostore: \${isImpostor})\`);
+            });
+            
+            socket.on('disconnect', () => {
+                console.log('Client disconnesso:', socket.id);
+                
+                const room = findRoomBySocket(socket.id);
+                if (room) {
+                    const updatedPlayers = room.removePlayer(socket.id);
+                    io.to(room.code).emit('playerLeft', updatedPlayers);
+                    
+                    // Se la stanza è vuota, eliminala
+                    if (updatedPlayers.length === 0) {
+                        delete rooms[room.code];
+                        console.log(\`Stanza \${room.code} eliminata\`);
+                    }
+                }
+            });
+            
+            function generateRoomCode() {
+                let code;
+                do {
+                    code = Math.random().toString(36).substr(2, 5).toUpperCase();
+                } while (rooms[code]);
+                return code;
+            }
+            
+            function findRoomBySocket(socketId) {
+                for (const code in rooms) {
+                    if (rooms[code].players.some(p => p.socketId === socketId)) {
+                        return rooms[code];
+                    }
+                }
+                return null;
+            }
+        });
+        
+        const PORT = process.env.PORT || 3000;
+        server.listen(PORT, () => {
+            console.log(\`Server in ascolto sulla porta \${PORT}\`);
+        });
+        `;
+
+        // Per avviare il server, salva questo codice in un file server.js e esegui:
+        // npm init -y
+        // npm install express socket.io
+        // node server.js
+    </script>
 </body>
 </html>

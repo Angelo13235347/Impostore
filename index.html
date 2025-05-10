@@ -982,7 +982,8 @@
 
         // Connessione Socket.io
         function connectToServer() {
-            socket = io({
+            // Usiamo un server di backend su Glitch per il gioco
+            socket = io('https://impostore-pro.glitch.me', {
                 reconnectionAttempts: 5,
                 reconnectionDelay: 1000,
                 reconnectionDelayMax: 5000
@@ -1025,221 +1026,196 @@
                 roomCodeDisplay.style.display = 'block';
                 
                 // Aggiorna UI con le impostazioni
-                lobbyDifficulty.textContent = getDifficultyName(data.settings.difficulty);
-                lobbyRoundsToWin.textContent = data.settings.roundsToWin;
+                                      lobbyDifficulty.textContent = getDifficultyText(gameSettings.difficulty);
+                lobbyRoundsToWin.textContent = gameSettings.roundsToWin;
                 
                 isHost = true;
-                myName = data.hostName;
+                myName = hostNameInput.value.trim();
                 document.getElementById('hostControls').style.display = 'block';
                 showScreen('lobby');
-                updatePlayerList([{ name: data.hostName, isHost: true, isImpostor: false }]);
-                
-                showNotification('Stanza creata con successo!', 'success');
             });
 
-            socket.on('joinSuccess', (data) => {
+            socket.on('playerJoined', (players) => {
+                updatePlayerList(players);
+                showNotification(`${players[players.length - 1].name} si è unito alla stanza!`, 'success');
+            });
+
+            socket.on('playerLeft', (players) => {
+                updatePlayerList(players);
+                showNotification('Un giocatore ha lasciato la stanza', 'warning');
+            });
+
+            socket.on('roomJoined', (data) => {
                 roomCode = data.roomCode;
-                myName = data.playerName;
-                isHost = data.isHost;
+                myName = playerNameInput.value.trim();
                 gameSettings = data.settings;
                 
                 lobbyRoomCode.textContent = data.roomCode;
-                lobbyDifficulty.textContent = getDifficultyName(data.settings.difficulty);
-                lobbyRoundsToWin.textContent = data.settings.roundsToWin;
+                lobbyDifficulty.textContent = getDifficultyText(gameSettings.difficulty);
+                lobbyRoundsToWin.textContent = gameSettings.roundsToWin;
                 
-                if (isHost) {
-                    document.getElementById('hostControls').style.display = 'block';
-                }
-                
+                isHost = false;
+                document.getElementById('hostControls').style.display = 'none';
                 showScreen('lobby');
                 updatePlayerList(data.players);
-                showNotification(`Benvenuto nella stanza ${data.roomCode}`, 'success');
             });
 
-            socket.on('joinError', (error) => {
-                showNotification(error.message, 'error');
+            socket.on('roomFull', () => {
+                showNotification('La stanza è piena!', 'error');
             });
 
-            socket.on('playerJoined', (player) => {
-                currentPlayers.push(player);
-                updatePlayerList(currentPlayers);
-                showNotification(`${player.name} si è unito alla stanza`, 'info');
+            socket.on('roomNotFound', () => {
+                showNotification('Stanza non trovata!', 'error');
             });
 
-            socket.on('playerLeft', (playerName) => {
-                currentPlayers = currentPlayers.filter(p => p.name !== playerName);
-                updatePlayerList(currentPlayers);
-                showNotification(`${playerName} ha lasciato la stanza`, 'warning');
+            socket.on('invalidName', () => {
+                showNotification('Nome non valido!', 'error');
             });
 
-            socket.on('gameStarting', () => {
+            socket.on('gameStarted', (data) => {
                 showScreen('game');
-                gameStatus.textContent = 'Preparati! La partita sta per iniziare...';
-                showNotification('La partita sta per iniziare!', 'info');
+                currentRound = 1;
+                innocentPoints = 0;
+                impostorPoints = 0;
+                updateScoreDisplay();
+                startRound(data);
             });
 
-            socket.on('roundStart', (data) => {
-                currentRound = data.round;
-                isImpostor = data.isImpostor;
-                
-                roundNumber.textContent = currentRound;
-                innocentCount.textContent = data.innocentPoints;
-                impostorCount.textContent = data.impostorPoints;
-                
-                // Mostra il ruolo del giocatore
-                roleIndicator.style.display = 'block';
-                roleBadge.className = isImpostor ? 'badge badge-danger' : 'badge badge-success';
-                roleBadge.textContent = isImpostor ? 'SEI L\'IMPOSTORE!' : 'SEI INNOCENTE';
-                
-                gameStatus.textContent = isImpostor ? 
-                    'Ascolterai una canzone diversa dagli altri. Cerca di non farti scoprire!' : 
-                    'Ascolta attentamente la canzone e cerca di scoprire chi è l\'impostore!';
-                
-                // Nascondi la sezione di voto
-                votingSection.style.display = 'none';
-                resultsSection.style.display = 'none';
-                
-                // Avvia il timer per l'ascolto
-                startTimer(gameSettings.songDuration);
-                
-                // Riproduci l'audio
-                audioPlayer.src = data.songUrl;
-                audioPlayer.currentTime = 0;
-                audioPlayer.play().catch(e => {
-                    showNotification('Clicca per avviare l\'audio', 'warning');
-                });
-            });
-
-            socket.on('votingStart', () => {
-                audioPlayer.pause();
-                clearInterval(timerInterval);
-                
-                gameStatus.textContent = 'Vota chi pensi sia l\'impostore!';
-                votingSection.style.display = 'block';
-                
-                // Pulisci le opzioni di voto precedenti
-                votingOptions.innerHTML = '';
-                
-                // Aggiungi i giocatori come opzioni di voto (escludendo se stessi)
-                currentPlayers.forEach(player => {
-                    if (player.name !== myName) {
-                        const voteBtn = document.createElement('div');
-                        voteBtn.className = 'vote-btn';
-                        voteBtn.textContent = player.name;
-                        voteBtn.onclick = () => {
-                            socket.emit('castVote', { 
-                                roomCode: roomCode, 
-                                voter: myName, 
-                                votedFor: player.name 
-                            });
-                            // Disabilita tutti i pulsanti di voto
-                            document.querySelectorAll('.vote-btn').forEach(btn => {
-                                btn.style.opacity = '0.5';
-                                btn.style.pointerEvents = 'none';
-                            });
-                            voteBtn.style.borderColor = 'var(--primary)';
-                            gameStatus.textContent = `Hai votato per ${player.name}. Attendi gli altri...`;
-                        };
-                        votingOptions.appendChild(voteBtn);
-                    }
-                });
-            });
-
-            socket.on('roundResults', (data) => {
-                resultsSection.style.display = 'block';
-                resultsSection.innerHTML = '';
-                
-                const resultTitle = document.createElement('h3');
-                resultTitle.textContent = 'Risultati del Round:';
-                resultsSection.appendChild(resultTitle);
-                
-                const resultText = document.createElement('p');
-                if (data.impostorFound) {
-                    resultText.innerHTML = `Gli innocenti hanno scoperto l'impostore <strong>${data.impostorName}</strong>!`;
-                    resultText.style.color = 'var(--success)';
-                } else {
-                    resultText.innerHTML = `L'impostore <strong>${data.impostorName}</strong> è riuscito a sfuggire!`;
-                    resultText.style.color = 'var(--danger)';
-                }
-                resultsSection.appendChild(resultText);
-                
-                const votesList = document.createElement('ul');
-                votesList.style.marginTop = '10px';
-                
-                data.votes.forEach(vote => {
-                    const voteItem = document.createElement('li');
-                    voteItem.textContent = `${vote.voter} ha votato per ${vote.votedFor}`;
-                    votesList.appendChild(voteItem);
-                });
-                
-                resultsSection.appendChild(votesList);
-                
-                // Aggiorna i punteggi
-                innocentCount.textContent = data.innocentPoints;
-                impostorCount.textContent = data.impostorPoints;
+            socket.on('newRound', (data) => {
+                currentRound++;
+                startRound(data);
             });
 
             socket.on('gameOver', (data) => {
-                resultsSection.style.display = 'block';
-                resultsSection.innerHTML = '';
+                clearInterval(timerInterval);
                 
-                const gameOverTitle = document.createElement('h3');
-                gameOverTitle.textContent = 'GAME OVER';
-                gameOverTitle.style.color = 'var(--primary)';
-                gameOverTitle.style.textAlign = 'center';
-                gameOverTitle.style.fontSize = '1.8rem';
-                resultsSection.appendChild(gameOverTitle);
-                
-                const winnerText = document.createElement('p');
-                winnerText.style.textAlign = 'center';
-                winnerText.style.fontSize = '1.2rem';
-                winnerText.style.margin = '15px 0';
-                
+                let resultMessage = '';
                 if (data.winner === 'innocents') {
-                    winnerText.innerHTML = `<span style="color: var(--success)">GLI INNOCENTI HANNO VINTO!</span>`;
+                    resultMessage = `<h3>🎉 Gli Innocenti vincono! 🎉</h3>
+                                     <p>Hanno indovinato ${data.innocentPoints} round su ${gameSettings.roundsToWin}!</p>`;
                 } else {
-                    winnerText.innerHTML = `<span style="color: var(--danger)">L'IMPOSTORE HA VINTO!</span>`;
+                    resultMessage = `<h3>😈 Gli Impostori vincono! 😈</h3>
+                                    <p>Hanno ingannato gli altri per ${data.impostorPoints} round su ${gameSettings.roundsToWin}!</p>`;
                 }
                 
-                resultsSection.appendChild(winnerText);
+                resultsSection.innerHTML = resultMessage;
+                resultsSection.style.display = 'block';
                 
-                const finalScore = document.createElement('p');
-                finalScore.style.textAlign = 'center';
-                finalScore.innerHTML = `Punteggio finale: Innocenti ${data.innocentPoints} - ${data.impostorPoints} Impostore`;
-                resultsSection.appendChild(finalScore);
-                
-                const restartBtn = document.createElement('button');
-                restartBtn.className = 'btn';
-                restartBtn.style.marginTop = '15px';
-                restartBtn.innerHTML = '<i class="icon">🔄</i> Gioca di nuovo';
-                restartBtn.onclick = () => {
-                    socket.emit('restartGame', { roomCode: roomCode });
-                };
-                
-                if (isHost) {
-                    resultsSection.appendChild(restartBtn);
-                }
+                // Mostra pulsante per tornare alla lobby
+                setTimeout(() => {
+                    const backToLobbyBtn = document.createElement('button');
+                    backToLobbyBtn.className = 'btn';
+                    backToLobbyBtn.innerHTML = '<i class="icon">🏠</i> Torna alla Lobby';
+                    backToLobbyBtn.onclick = () => {
+                        socket.emit('returnToLobby');
+                        showScreen('lobby');
+                        resultsSection.style.display = 'none';
+                        votingSection.style.display = 'none';
+                        roleIndicator.style.display = 'none';
+                    };
+                    resultsSection.appendChild(backToLobbyBtn);
+                }, 2000);
+            });
+
+            socket.on('returnedToLobby', () => {
+                showScreen('lobby');
+                resultsSection.style.display = 'none';
+                votingSection.style.display = 'none';
+                roleIndicator.style.display = 'none';
             });
 
             socket.on('settingsUpdated', (settings) => {
                 gameSettings = settings;
-                lobbyDifficulty.textContent = getDifficultyName(settings.difficulty);
-                lobbyRoundsToWin.textContent = settings.roundsToWin;
-                showNotification('Impostazioni aggiornate', 'success');
-            });
-
-            socket.on('error', (error) => {
-                showNotification(error.message, 'error');
+                lobbyDifficulty.textContent = getDifficultyText(gameSettings.difficulty);
+                lobbyRoundsToWin.textContent = gameSettings.roundsToWin;
+                showNotification('Impostazioni aggiornate!', 'success');
             });
         }
 
-        function getDifficultyName(difficulty) {
+        function getDifficultyText(difficulty) {
             switch (difficulty) {
                 case 'easy': return 'Facile';
                 case 'medium': return 'Medio';
                 case 'hard': return 'Difficile';
                 default: return difficulty;
             }
+        }
+
+        function startRound(data) {
+            isImpostor = data.isImpostor;
+            roundNumber.textContent = currentRound;
+            
+            // Mostra il ruolo del giocatore
+            roleIndicator.style.display = 'block';
+            if (isImpostor) {
+                roleBadge.className = 'badge badge-danger';
+                roleBadge.textContent = 'SEI L\'IMPOSTORE!';
+                gameStatus.textContent = 'Ascolterai una canzone diversa dagli altri. Cerca di non farti scoprire!';
+            } else {
+                roleBadge.className = 'badge badge-success';
+                roleBadge.textContent = 'SEI INNOCENTE';
+                gameStatus.textContent = 'Ascolta attentamente la canzone e cerca di scoprire chi è l\'impostore!';
+            }
+            
+            // Riproduci la canzone
+            audioPlayer.src = isImpostor ? data.impostorSong : data.song;
+            audioPlayer.load();
+            
+            // Avvia il timer
+            gameStatus.textContent = isImpostor ? 
+                'La canzone sta per iniziare... (solo tu ascolti una versione diversa)' : 
+                'La canzone sta per iniziare...';
+            
+            setTimeout(() => {
+                audioPlayer.play().catch(e => {
+                    showNotification('Clicca sullo schermo per avviare l\'audio', 'warning');
+                    document.body.addEventListener('click', () => {
+                        audioPlayer.play();
+                    }, { once: true });
+                });
+                
+                startTimer(gameSettings.songDuration);
+                gameStatus.textContent = isImpostor ? 
+                    'Ascolta la tua canzone e cerca di non farti scoprire!' : 
+                    'Ascolta attentamente e cerca di capire chi è l\'impostore!';
+                
+                // Mostra la sezione di voto quando il timer scade
+                setTimeout(() => {
+                    startVoting(data.players);
+                }, gameSettings.songDuration * 1000);
+            }, 3000);
+        }
+
+        function startVoting(players) {
+            audioPlayer.pause();
+            votingSection.style.display = 'block';
+            votingOptions.innerHTML = '';
+            
+            gameStatus.textContent = isImpostor ? 
+                'Vota per confondere gli altri!' : 
+                'Chi pensi sia l\'impostore?';
+            
+            players.forEach(player => {
+                if (player.name !== myName) { // Non puoi votare te stesso
+                    const voteBtn = document.createElement('div');
+                    voteBtn.className = 'vote-btn';
+                    voteBtn.textContent = player.name;
+                    voteBtn.onclick = () => {
+                        socket.emit('vote', { playerName: player.name });
+                        votingOptions.querySelectorAll('.vote-btn').forEach(btn => {
+                            btn.style.pointerEvents = 'none';
+                        });
+                        voteBtn.style.borderColor = 'var(--primary)';
+                        gameStatus.textContent = 'Voto registrato! Attendere i risultati...';
+                    };
+                    votingOptions.appendChild(voteBtn);
+                }
+            });
+        }
+
+        function updateScoreDisplay() {
+            innocentCount.textContent = innocentPoints;
+            impostorCount.textContent = impostorPoints;
         }
 
         // Event listeners
@@ -1259,120 +1235,108 @@
             howToPlayModal.style.display = 'none';
         });
 
-        closeModalButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                button.closest('.modal').style.display = 'none';
-            });
-        });
-
-        window.addEventListener('click', (event) => {
-            if (event.target.className === 'modal') {
-                event.target.style.display = 'none';
-            }
-        });
-
         startRoomBtn.addEventListener('click', () => {
             const name = hostNameInput.value.trim();
             if (!name) {
-                showNotification('Inserisci il tuo nome', 'error');
+                showNotification('Inserisci un nome valido', 'error');
                 return;
             }
-
-            if (!socket || !socket.connected) {
-                connectToServer();
-            }
-
+            
+            connectToServer();
+            
             const settings = {
                 difficulty: gameDifficultySelect.value,
                 songDuration: parseInt(songDurationSelect.value),
                 roundsToWin: parseInt(roundsToWinSelect.value)
             };
-
-            socket.emit('createRoom', {
-                hostName: name,
-                settings: settings
+            
+            socket.emit('createRoom', { 
+                playerName: name, 
+                settings: settings 
             });
         });
 
         joinGameBtn.addEventListener('click', () => {
             const name = playerNameInput.value.trim();
             const code = roomCodeInput.value.trim().toUpperCase();
-
+            
             if (!name) {
-                showNotification('Inserisci il tuo nome', 'error');
+                showNotification('Inserisci un nome valido', 'error');
                 return;
             }
-
+            
             if (!code || code.length !== 5) {
                 showNotification('Inserisci un codice stanza valido (5 caratteri)', 'error');
                 return;
             }
-
-            if (!socket || !socket.connected) {
-                connectToServer();
-            }
-
-            socket.emit('joinRoom', {
-                playerName: name,
-                roomCode: code
+            
+            connectToServer();
+            socket.emit('joinRoom', { 
+                playerName: name, 
+                roomCode: code 
             });
         });
 
         startGameBtn.addEventListener('click', () => {
-            socket.emit('startGame', { roomCode: roomCode });
+            socket.emit('startGame');
         });
 
         leaveLobbyBtn.addEventListener('click', () => {
-            if (socket && socket.connected) {
-                socket.emit('leaveRoom', { roomCode: roomCode });
+            if (socket) {
+                socket.emit('leaveRoom');
+                socket.disconnect();
             }
             showScreen('home');
-            roomCode = '';
         });
 
         copyRoomCodeBtn.addEventListener('click', () => {
             navigator.clipboard.writeText(roomCode)
-                .then(() => {
-                    showNotification('Codice copiato negli appunti!', 'success');
-                })
-                .catch(() => {
-                    showNotification('Impossibile copiare il codice', 'error');
-                });
+                .then(() => showNotification('Codice copiato!', 'success'))
+                .catch(() => showNotification('Impossibile copiare il codice', 'error'));
         });
 
         lobbySettingsBtn.addEventListener('click', () => {
-            // Imposta i valori correnti nel modal
+            // Popola il modal con le impostazioni correnti
             lobbyDifficultySelect.value = gameSettings.difficulty;
-            lobbySongDurationSelect.value = gameSettings.songDuration.toString();
-            lobbyRoundsToWinSelect.value = gameSettings.roundsToWin.toString();
+            lobbySongDurationSelect.value = gameSettings.songDuration;
+            lobbyRoundsToWinSelect.value = gameSettings.roundsToWin;
             
             lobbySettingsModal.style.display = 'flex';
         });
 
         saveLobbySettingsBtn.addEventListener('click', () => {
-            const newSettings = {
+            const settings = {
                 difficulty: lobbyDifficultySelect.value,
                 songDuration: parseInt(lobbySongDurationSelect.value),
                 roundsToWin: parseInt(lobbyRoundsToWinSelect.value)
             };
-
-            socket.emit('updateSettings', {
-                roomCode: roomCode,
-                settings: newSettings
-            });
-
+            
+            socket.emit('updateSettings', settings);
             lobbySettingsModal.style.display = 'none';
         });
 
-        // Inizializza la connessione al server
-        connectToServer();
-
-        // Gestione audio su mobile (richiesta di interazione utente)
-        document.addEventListener('click', () => {
-            if (audioPlayer.paused && audioPlayer.src) {
-                audioPlayer.play().catch(e => console.log('Autoplay non consentito'));
+        // Chiudi modali quando si clicca fuori
+        window.addEventListener('click', (e) => {
+            if (e.target === howToPlayModal) {
+                howToPlayModal.style.display = 'none';
             }
-        }, { once: true });
+            if (e.target === lobbySettingsModal) {
+                lobbySettingsModal.style.display = 'none';
+            }
+        });
+
+        // Chiudi modali con il pulsante X
+        closeModalButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                howToPlayModal.style.display = 'none';
+                lobbySettingsModal.style.display = 'none';
+            });
+        });
+
+        // Gestione errori audio
+        audioPlayer.addEventListener('error', () => {
+            showNotification('Errore nel caricamento della canzone', 'error');
+        });
     </script>
 </body>
 </html>

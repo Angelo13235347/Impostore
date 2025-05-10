@@ -22,6 +22,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -34,6 +35,7 @@
             align-items: center;
             padding: 20px;
             background-image: radial-gradient(circle at 15% 50%, rgba(45, 48, 71, 0.8) 0%, rgba(30, 30, 36, 0.9) 100%);
+            touch-action: manipulation;
         }
         
         .container {
@@ -41,7 +43,7 @@
             max-width: 1200px;
             background-color: rgba(45, 48, 71, 0.9);
             border-radius: 16px;
-            padding: 30px;
+            padding: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -49,37 +51,19 @@
             overflow: hidden;
         }
         
-        .container::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 77, 77, 0.1) 0%, transparent 70%);
-            z-index: -1;
-            animation: pulse 15s infinite alternate;
-        }
-        
-        @keyframes pulse {
-            0% { transform: translate(0, 0); }
-            50% { transform: translate(25%, 25%); }
-            100% { transform: translate(-25%, -25%); }
-        }
-        
         h1 {
             color: var(--primary);
             text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.5rem;
+            margin-bottom: 20px;
+            font-size: 2rem;
             font-weight: 700;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
         
         h2 {
             color: var(--light);
-            margin-bottom: 20px;
-            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
         }
         
         .screen {
@@ -100,12 +84,12 @@
             background-color: var(--primary);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 12px 20px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 1rem;
             font-weight: 600;
-            margin: 10px 0;
+            margin: 8px 0;
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             text-transform: uppercase;
@@ -114,6 +98,9 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            width: 100%;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .btn:hover {
@@ -154,15 +141,16 @@
         .btn-sm {
             padding: 8px 16px;
             font-size: 0.85rem;
+            width: auto;
         }
         
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 600;
             color: rgba(247, 247, 255, 0.8);
         }
@@ -176,6 +164,8 @@
             color: var(--light);
             font-size: 1rem;
             transition: all 0.3s;
+            -webkit-appearance: none;
+            appearance: none;
         }
         
         input:focus, select:focus {
@@ -186,7 +176,7 @@
         }
         
         .player-list {
-            margin: 30px 0;
+            margin: 20px 0;
             border-radius: 8px;
             overflow: hidden;
             background-color: rgba(247, 247, 255, 0.05);
@@ -194,7 +184,7 @@
         }
         
         .player-item {
-            padding: 15px 20px;
+            padding: 12px 15px;
             border-bottom: 1px solid rgba(247, 247, 255, 0.1);
             display: flex;
             align-items: center;
@@ -204,10 +194,6 @@
         
         .player-item:last-child {
             border-bottom: none;
-        }
-        
-        .player-item:hover {
-            background-color: rgba(247, 247, 255, 0.1);
         }
         
         .player-name {
@@ -228,65 +214,72 @@
         
         .game-area {
             text-align: center;
-            padding: 20px;
+            padding: 15px;
         }
         
         .game-info {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             background-color: rgba(247, 247, 255, 0.05);
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .info-item {
             text-align: center;
+            flex: 1;
+            min-width: 80px;
         }
         
         .info-label {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: rgba(247, 247, 255, 0.7);
             margin-bottom: 5px;
         }
         
         .info-value {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
             color: var(--primary);
         }
         
         #audioPlayer {
             width: 100%;
-            max-width: 500px;
-            margin: 30px auto;
+            max-width: 100%;
+            margin: 20px auto;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
         
         .timer {
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            margin: 20px 0;
+            margin: 15px 0;
             color: var(--primary);
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
         
         .voting-options {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-            margin: 30px 0;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
         }
         
         .vote-btn {
             background-color: var(--secondary);
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
             border: 2px solid transparent;
+            text-align: center;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .vote-btn:hover {
@@ -301,36 +294,39 @@
         }
         
         .results {
-            margin-top: 30px;
-            padding: 20px;
+            margin-top: 20px;
+            padding: 15px;
             background-color: rgba(247, 247, 255, 0.05);
             border-radius: 8px;
             border-left: 4px solid var(--primary);
         }
         
         .admin-controls {
-            margin-top: 30px;
-            padding-top: 20px;
+            margin-top: 20px;
+            padding-top: 15px;
             border-top: 1px solid rgba(247, 247, 255, 0.1);
         }
         
         .settings-panel {
             background-color: rgba(247, 247, 255, 0.05);
-            padding: 20px;
+            padding: 15px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .settings-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
         }
         
         .settings-label {
             font-weight: 600;
             color: rgba(247, 247, 255, 0.8);
+            margin-bottom: 5px;
+            width: 100%;
         }
         
         .badge {
@@ -385,26 +381,32 @@
             align-items: center;
             justify-content: center;
             animation: fadeIn 0.3s;
+            padding: 15px;
+            overflow-y: auto;
         }
         
         .modal-content {
             background-color: var(--secondary);
-            padding: 30px;
+            padding: 20px;
             border-radius: 12px;
-            width: 90%;
+            width: 100%;
             max-width: 500px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
             position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         
         .close-modal {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 10px;
+            right: 10px;
             font-size: 1.5rem;
             cursor: pointer;
             color: rgba(247, 247, 255, 0.5);
             transition: color 0.3s;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .close-modal:hover {
@@ -419,12 +421,12 @@
         
         .tooltip .tooltiptext {
             visibility: hidden;
-            width: 200px;
+            width: 180px;
             background-color: var(--dark);
             color: var(--light);
             text-align: center;
             border-radius: 6px;
-            padding: 10px;
+            padding: 8px;
             position: absolute;
             z-index: 1;
             bottom: 125%;
@@ -432,7 +434,7 @@
             transform: translateX(-50%);
             opacity: 0;
             transition: opacity 0.3s;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: normal;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(247, 247, 255, 0.1);
@@ -445,10 +447,10 @@
         
         .progress-container {
             width: 100%;
-            height: 8px;
+            height: 6px;
             background-color: rgba(247, 247, 255, 0.1);
             border-radius: 4px;
-            margin: 20px 0;
+            margin: 15px 0;
             overflow: hidden;
         }
         
@@ -461,20 +463,21 @@
         
         .notification {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
+            top: 15px;
+            right: 15px;
+            padding: 12px 16px;
             background-color: var(--secondary);
             color: var(--light);
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             transform: translateX(200%);
             transition: transform 0.3s ease;
             z-index: 1001;
             border-left: 4px solid var(--primary);
+            max-width: 90%;
         }
         
         .notification.show {
@@ -493,22 +496,37 @@
             border-left-color: var(--warning);
         }
         
-        @media (max-width: 768px) {
+        /* Mobile specific adjustments */
+        @media (max-width: 480px) {
             .container {
-                padding: 20px;
+                padding: 15px;
             }
             
             h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
+                margin-bottom: 15px;
             }
             
-            .game-info {
-                flex-direction: column;
-                gap: 15px;
+            h2 {
+                font-size: 1.3rem;
+                margin-bottom: 12px;
+            }
+            
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
             }
             
             .voting-options {
                 grid-template-columns: 1fr;
+            }
+            
+            .timer {
+                font-size: 2rem;
+            }
+            
+            .modal-content {
+                padding: 15px;
             }
         }
     </style>
@@ -607,7 +625,7 @@
             
             <div class="input-group">
                 <label for="roomCodeInput">Codice Stanza</label>
-                <input type="text" id="roomCodeInput" placeholder="Inserisci il codice della stanza" maxlength="5">
+                <input type="text" id="roomCodeInput" placeholder="Inserisci il codice della stanza" maxlength="5" pattern="[A-Za-z0-9]{5}" title="Inserisci un codice di 5 caratteri">
             </div>
             
             <button id="joinGameBtn" class="btn">
@@ -683,7 +701,7 @@
                 
                 <audio id="audioPlayer" controls></audio>
                 
-                <div id="roleIndicator" style="display: none; margin: 20px 0;">
+                <div id="roleIndicator" style="display: none; margin: 15px 0;">
                     <div class="badge" id="roleBadge"></div>
                 </div>
                 
@@ -704,8 +722,8 @@
             <h2><i class="icon">❓</i> Come Giocare</h2>
             <p>Benvenuto in <strong>Impostore PRO</strong>, il gioco musicale dove devi scoprire chi sta ascoltando una canzone diversa!</p>
             
-            <h3 style="margin-top: 20px;">📌 Regole del Gioco:</h3>
-            <ul style="margin: 15px 0 15px 20px;">
+            <h3 style="margin-top: 15px;">📌 Regole del Gioco:</h3>
+            <ul style="margin: 12px 0 12px 20px;">
                 <li>Un giocatore crea una stanza e condivide il codice con gli amici</li>
                 <li>Tutti i giocatori ascoltano la stessa canzone, tranne l'<strong>Impostore</strong></li>
                 <li>L'Impostore ascolta una canzone simile ma diversa</li>
@@ -715,14 +733,14 @@
                 <li>La partita continua fino a quando una squadra raggiunge il numero di round necessari per vincere</li>
             </ul>
             
-            <h3 style="margin-top: 20px;">🎮 Consigli:</h3>
-            <ul style="margin: 15px 0 15px 20px;">
+            <h3 style="margin-top: 15px;">🎮 Consigli:</h3>
+            <ul style="margin: 12px 0 12px 20px;">
                 <li>Ascolta attentamente i dettagli della canzone</li>
                 <li>Osserva le reazioni degli altri giocatori</li>
                 <li>Se sei l'Impostore, cerca di non farti notare!</li>
             </ul>
             
-            <button id="closeHowToPlay" class="btn" style="margin-top: 20px;">
+            <button id="closeHowToPlay" class="btn" style="margin-top: 15px;">
                 <i class="icon">👍</i> Ho capito!
             </button>
         </div>
@@ -1010,176 +1028,208 @@
                 lobbyDifficulty.textContent = getDifficultyName(data.settings.difficulty);
                 lobbyRoundsToWin.textContent = data.settings.roundsToWin;
                 
+                isHost = true;
+                myName = data.hostName;
+                document.getElementById('hostControls').style.display = 'block';
                 showScreen('lobby');
+                updatePlayerList([{ name: data.hostName, isHost: true, isImpostor: false }]);
+                
                 showNotification('Stanza creata con successo!', 'success');
             });
 
-            socket.on('playerJoined', (players) => {
-                updatePlayerList(players);
-                showNotification(`${players[players.length - 1].name} si è unito alla stanza`, 'success');
-            });
-
-            socket.on('playerLeft', (players) => {
-                updatePlayerList(players);
-                showNotification('Un giocatore ha lasciato la stanza', 'warning');
-            });
-
-            socket.on('joinedRoom', (data) => {
+            socket.on('joinSuccess', (data) => {
                 roomCode = data.roomCode;
                 myName = data.playerName;
                 isHost = data.isHost;
-                currentPlayers = data.players;
                 gameSettings = data.settings;
-
+                
                 lobbyRoomCode.textContent = data.roomCode;
                 lobbyDifficulty.textContent = getDifficultyName(data.settings.difficulty);
                 lobbyRoundsToWin.textContent = data.settings.roundsToWin;
-                
-                updatePlayerList(data.players);
                 
                 if (isHost) {
                     document.getElementById('hostControls').style.display = 'block';
                 }
                 
                 showScreen('lobby');
+                updatePlayerList(data.players);
                 showNotification(`Benvenuto nella stanza ${data.roomCode}`, 'success');
             });
 
-            socket.on('roomNotFound', () => {
-                showNotification('Stanza non trovata. Verifica il codice.', 'error');
+            socket.on('joinError', (error) => {
+                showNotification(error.message, 'error');
             });
 
-            socket.on('roomFull', () => {
-                showNotification('La stanza è piena', 'error');
+            socket.on('playerJoined', (player) => {
+                currentPlayers.push(player);
+                updatePlayerList(currentPlayers);
+                showNotification(`${player.name} si è unito alla stanza`, 'info');
             });
 
-            socket.on('nameTaken', () => {
-                showNotification('Nome già in uso in questa stanza', 'error');
+            socket.on('playerLeft', (playerName) => {
+                currentPlayers = currentPlayers.filter(p => p.name !== playerName);
+                updatePlayerList(currentPlayers);
+                showNotification(`${playerName} ha lasciato la stanza`, 'warning');
             });
 
             socket.on('gameStarting', () => {
-                showNotification('La partita sta per iniziare!', 'success');
                 showScreen('game');
+                gameStatus.textContent = 'Preparati! La partita sta per iniziare...';
+                showNotification('La partita sta per iniziare!', 'info');
             });
 
-            socket.on('assignRole', (role) => {
-                isImpostor = role === 'impostor';
+            socket.on('roundStart', (data) => {
+                currentRound = data.round;
+                isImpostor = data.isImpostor;
+                
+                roundNumber.textContent = currentRound;
+                innocentCount.textContent = data.innocentPoints;
+                impostorCount.textContent = data.impostorPoints;
+                
+                // Mostra il ruolo del giocatore
                 roleIndicator.style.display = 'block';
+                roleBadge.className = isImpostor ? 'badge badge-danger' : 'badge badge-success';
+                roleBadge.textContent = isImpostor ? 'SEI L\'IMPOSTORE!' : 'SEI INNOCENTE';
                 
-                if (isImpostor) {
-                    roleBadge.className = 'badge badge-danger';
-                    roleBadge.textContent = 'SEI L\'IMPOSTORE!';
-                    gameStatus.textContent = 'Ascolta attentamente la canzone e cerca di non farti scoprire!';
-                } else {
-                    roleBadge.className = 'badge badge-success';
-                    roleBadge.textContent = 'SEI INNOCENTE';
-                    gameStatus.textContent = 'Ascolta la canzone e cerca di individuare l\'impostore!';
-                }
-            });
-
-            socket.on('playSong', (songData) => {
-                audioPlayer.src = songData.url;
-                audioPlayer.play().catch(e => {
-                    console.error('Errore nella riproduzione:', e);
-                    showNotification('Clicca sullo schermo per avviare la musica', 'warning');
-                });
+                gameStatus.textContent = isImpostor ? 
+                    'Ascolterai una canzone diversa dagli altri. Cerca di non farti scoprire!' : 
+                    'Ascolta attentamente la canzone e cerca di scoprire chi è l\'impostore!';
                 
-                gameStatus.textContent = isImpostor 
-                    ? 'Stai ascoltando una canzone diversa dagli altri!' 
-                    : 'Tutti stanno ascoltando la stessa canzone, tranne l\'impostore!';
-                
-                startTimer(gameSettings.songDuration);
-                
-                setTimeout(() => {
-                    audioPlayer.pause();
-                    startVoting();
-                }, gameSettings.songDuration * 1000);
-            });
-
-            socket.on('votingStarted', () => {
-                startVoting();
-            });
-
-            socket.on('voteReceived', (votes) => {
-                // Mostra i voti ricevuti (solo per l'host)
-                if (isHost) {
-                    let votesText = 'Voti ricevuti:<br>';
-                    for (const [voter, votedFor] of Object.entries(votes)) {
-                        votesText += `${voter} → ${votedFor}<br>`;
-                    }
-                    resultsSection.innerHTML = votesText;
-                    resultsSection.style.display = 'block';
-                }
-            });
-
-            socket.on('roundResult', (result) => {
-                let resultHTML = `<h3>Risultato Round ${currentRound}</h3>`;
-                
-                if (result.impostorFound) {
-                    resultHTML += `<p>L'impostore <strong>${result.impostorName}</strong> è stato scoperto!</p>`;
-                    resultHTML += `<p>Punto per gli <strong>Innocenti</strong>!</p>`;
-                } else {
-                    resultHTML += `<p>L'impostore <strong>${result.impostorName}</strong> non è stato scoperto!</p>`;
-                    resultHTML += `<p>Punto per l'<strong>Impostore</strong>!</p>`;
-                }
-                
-                resultsSection.innerHTML = resultHTML;
-                resultsSection.style.display = 'block';
-                
-                innocentCount.textContent = result.innocentPoints;
-                impostorCount.textContent = result.impostorPoints;
-                
-                innocentPoints = result.innocentPoints;
-                impostorPoints = result.impostorPoints;
-                
-                if (result.gameOver) {
-                    gameStatus.textContent = result.winner === 'innocents' 
-                        ? 'Gli Innocenti hanno vinto la partita!' 
-                        : 'L\'Impostore ha vinto la partita!';
-                    
-                    setTimeout(() => {
-                        if (isHost) {
-                            socket.emit('returnToLobby');
-                        }
-                    }, 5000);
-                } else {
-                    currentRound++;
-                    roundNumber.textContent = currentRound;
-                    
-                    setTimeout(() => {
-                        if (isHost) {
-                            socket.emit('startNextRound');
-                        }
-                    }, 5000);
-                }
-            });
-
-            socket.on('returnedToLobby', () => {
-                currentRound = 1;
-                innocentPoints = 0;
-                impostorPoints = 0;
-                
-                roundNumber.textContent = '1';
-                innocentCount.textContent = '0';
-                impostorCount.textContent = '0';
-                
-                roleIndicator.style.display = 'none';
+                // Nascondi la sezione di voto
                 votingSection.style.display = 'none';
                 resultsSection.style.display = 'none';
                 
-                showScreen('lobby');
-                showNotification('Tornati in lobby!', 'success');
+                // Avvia il timer per l'ascolto
+                startTimer(gameSettings.songDuration);
+                
+                // Riproduci l'audio
+                audioPlayer.src = data.songUrl;
+                audioPlayer.currentTime = 0;
+                audioPlayer.play().catch(e => {
+                    showNotification('Clicca per avviare l\'audio', 'warning');
+                });
+            });
+
+            socket.on('votingStart', () => {
+                audioPlayer.pause();
+                clearInterval(timerInterval);
+                
+                gameStatus.textContent = 'Vota chi pensi sia l\'impostore!';
+                votingSection.style.display = 'block';
+                
+                // Pulisci le opzioni di voto precedenti
+                votingOptions.innerHTML = '';
+                
+                // Aggiungi i giocatori come opzioni di voto (escludendo se stessi)
+                currentPlayers.forEach(player => {
+                    if (player.name !== myName) {
+                        const voteBtn = document.createElement('div');
+                        voteBtn.className = 'vote-btn';
+                        voteBtn.textContent = player.name;
+                        voteBtn.onclick = () => {
+                            socket.emit('castVote', { 
+                                roomCode: roomCode, 
+                                voter: myName, 
+                                votedFor: player.name 
+                            });
+                            // Disabilita tutti i pulsanti di voto
+                            document.querySelectorAll('.vote-btn').forEach(btn => {
+                                btn.style.opacity = '0.5';
+                                btn.style.pointerEvents = 'none';
+                            });
+                            voteBtn.style.borderColor = 'var(--primary)';
+                            gameStatus.textContent = `Hai votato per ${player.name}. Attendi gli altri...`;
+                        };
+                        votingOptions.appendChild(voteBtn);
+                    }
+                });
+            });
+
+            socket.on('roundResults', (data) => {
+                resultsSection.style.display = 'block';
+                resultsSection.innerHTML = '';
+                
+                const resultTitle = document.createElement('h3');
+                resultTitle.textContent = 'Risultati del Round:';
+                resultsSection.appendChild(resultTitle);
+                
+                const resultText = document.createElement('p');
+                if (data.impostorFound) {
+                    resultText.innerHTML = `Gli innocenti hanno scoperto l'impostore <strong>${data.impostorName}</strong>!`;
+                    resultText.style.color = 'var(--success)';
+                } else {
+                    resultText.innerHTML = `L'impostore <strong>${data.impostorName}</strong> è riuscito a sfuggire!`;
+                    resultText.style.color = 'var(--danger)';
+                }
+                resultsSection.appendChild(resultText);
+                
+                const votesList = document.createElement('ul');
+                votesList.style.marginTop = '10px';
+                
+                data.votes.forEach(vote => {
+                    const voteItem = document.createElement('li');
+                    voteItem.textContent = `${vote.voter} ha votato per ${vote.votedFor}`;
+                    votesList.appendChild(voteItem);
+                });
+                
+                resultsSection.appendChild(votesList);
+                
+                // Aggiorna i punteggi
+                innocentCount.textContent = data.innocentPoints;
+                impostorCount.textContent = data.impostorPoints;
+            });
+
+            socket.on('gameOver', (data) => {
+                resultsSection.style.display = 'block';
+                resultsSection.innerHTML = '';
+                
+                const gameOverTitle = document.createElement('h3');
+                gameOverTitle.textContent = 'GAME OVER';
+                gameOverTitle.style.color = 'var(--primary)';
+                gameOverTitle.style.textAlign = 'center';
+                gameOverTitle.style.fontSize = '1.8rem';
+                resultsSection.appendChild(gameOverTitle);
+                
+                const winnerText = document.createElement('p');
+                winnerText.style.textAlign = 'center';
+                winnerText.style.fontSize = '1.2rem';
+                winnerText.style.margin = '15px 0';
+                
+                if (data.winner === 'innocents') {
+                    winnerText.innerHTML = `<span style="color: var(--success)">GLI INNOCENTI HANNO VINTO!</span>`;
+                } else {
+                    winnerText.innerHTML = `<span style="color: var(--danger)">L'IMPOSTORE HA VINTO!</span>`;
+                }
+                
+                resultsSection.appendChild(winnerText);
+                
+                const finalScore = document.createElement('p');
+                finalScore.style.textAlign = 'center';
+                finalScore.innerHTML = `Punteggio finale: Innocenti ${data.innocentPoints} - ${data.impostorPoints} Impostore`;
+                resultsSection.appendChild(finalScore);
+                
+                const restartBtn = document.createElement('button');
+                restartBtn.className = 'btn';
+                restartBtn.style.marginTop = '15px';
+                restartBtn.innerHTML = '<i class="icon">🔄</i> Gioca di nuovo';
+                restartBtn.onclick = () => {
+                    socket.emit('restartGame', { roomCode: roomCode });
+                };
+                
+                if (isHost) {
+                    resultsSection.appendChild(restartBtn);
+                }
             });
 
             socket.on('settingsUpdated', (settings) => {
                 gameSettings = settings;
                 lobbyDifficulty.textContent = getDifficultyName(settings.difficulty);
                 lobbyRoundsToWin.textContent = settings.roundsToWin;
-                showNotification('Impostazioni aggiornate!', 'success');
+                showNotification('Impostazioni aggiornate', 'success');
             });
 
-            socket.on('error', (message) => {
-                showNotification(message, 'error');
+            socket.on('error', (error) => {
+                showNotification(error.message, 'error');
             });
         }
 
@@ -1192,28 +1242,7 @@
             }
         }
 
-        function startVoting() {
-            gameStatus.textContent = 'Vota chi pensi sia l\'impostore!';
-            votingOptions.innerHTML = '';
-            votingSection.style.display = 'block';
-            
-            currentPlayers.forEach(player => {
-                if (player.name !== myName) {
-                    const voteBtn = document.createElement('div');
-                    voteBtn.className = 'vote-btn';
-                    voteBtn.textContent = player.name;
-                    voteBtn.onclick = () => {
-                        socket.emit('castVote', player.name);
-                        voteBtn.style.backgroundColor = 'var(--accent)';
-                        voteBtn.disabled = true;
-                        gameStatus.textContent = `Hai votato ${player.name}. Attendere gli altri giocatori...`;
-                    };
-                    votingOptions.appendChild(voteBtn);
-                }
-            });
-        }
-
-        // Event Listeners
+        // Event listeners
         createRoomBtn.addEventListener('click', () => {
             showScreen('createRoom');
         });
@@ -1226,111 +1255,123 @@
             howToPlayModal.style.display = 'flex';
         });
 
+        closeHowToPlay.addEventListener('click', () => {
+            howToPlayModal.style.display = 'none';
+        });
+
+        closeModalButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                button.closest('.modal').style.display = 'none';
+            });
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        });
+
         startRoomBtn.addEventListener('click', () => {
             const name = hostNameInput.value.trim();
             if (!name) {
-                showNotification('Inserisci un nome', 'error');
+                showNotification('Inserisci il tuo nome', 'error');
                 return;
             }
-            
-            myName = name;
-            isHost = true;
-            
+
+            if (!socket || !socket.connected) {
+                connectToServer();
+            }
+
             const settings = {
                 difficulty: gameDifficultySelect.value,
                 songDuration: parseInt(songDurationSelect.value),
                 roundsToWin: parseInt(roundsToWinSelect.value)
             };
-            
-            connectToServer();
-            socket.emit('createRoom', { 
-                playerName: name, 
-                settings: settings 
+
+            socket.emit('createRoom', {
+                hostName: name,
+                settings: settings
             });
         });
 
         joinGameBtn.addEventListener('click', () => {
             const name = playerNameInput.value.trim();
             const code = roomCodeInput.value.trim().toUpperCase();
-            
+
             if (!name) {
-                showNotification('Inserisci un nome', 'error');
+                showNotification('Inserisci il tuo nome', 'error');
                 return;
             }
-            
+
             if (!code || code.length !== 5) {
-                showNotification('Il codice stanza deve essere di 5 caratteri', 'error');
+                showNotification('Inserisci un codice stanza valido (5 caratteri)', 'error');
                 return;
             }
-            
-            myName = name;
-            isHost = false;
-            
-            connectToServer();
-            socket.emit('joinRoom', { 
-                playerName: name, 
-                roomCode: code 
+
+            if (!socket || !socket.connected) {
+                connectToServer();
+            }
+
+            socket.emit('joinRoom', {
+                playerName: name,
+                roomCode: code
             });
         });
 
         startGameBtn.addEventListener('click', () => {
-            socket.emit('startGame');
+            socket.emit('startGame', { roomCode: roomCode });
         });
 
         leaveLobbyBtn.addEventListener('click', () => {
-            socket.emit('leaveRoom');
+            if (socket && socket.connected) {
+                socket.emit('leaveRoom', { roomCode: roomCode });
+            }
             showScreen('home');
+            roomCode = '';
         });
 
         copyRoomCodeBtn.addEventListener('click', () => {
             navigator.clipboard.writeText(roomCode)
-                .then(() => showNotification('Codice copiato!', 'success'))
-                .catch(() => showNotification('Impossibile copiare il codice', 'error'));
+                .then(() => {
+                    showNotification('Codice copiato negli appunti!', 'success');
+                })
+                .catch(() => {
+                    showNotification('Impossibile copiare il codice', 'error');
+                });
         });
 
         lobbySettingsBtn.addEventListener('click', () => {
+            // Imposta i valori correnti nel modal
             lobbyDifficultySelect.value = gameSettings.difficulty;
             lobbySongDurationSelect.value = gameSettings.songDuration.toString();
             lobbyRoundsToWinSelect.value = gameSettings.roundsToWin.toString();
+            
             lobbySettingsModal.style.display = 'flex';
         });
 
         saveLobbySettingsBtn.addEventListener('click', () => {
-            const settings = {
+            const newSettings = {
                 difficulty: lobbyDifficultySelect.value,
                 songDuration: parseInt(lobbySongDurationSelect.value),
                 roundsToWin: parseInt(lobbyRoundsToWinSelect.value)
             };
-            
-            socket.emit('updateSettings', settings);
+
+            socket.emit('updateSettings', {
+                roomCode: roomCode,
+                settings: newSettings
+            });
+
             lobbySettingsModal.style.display = 'none';
         });
 
-        closeHowToPlay.addEventListener('click', () => {
-            howToPlayModal.style.display = 'none';
-        });
+        // Inizializza la connessione al server
+        connectToServer();
 
-        closeModalButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                howToPlayModal.style.display = 'none';
-                lobbySettingsModal.style.display = 'none';
-            });
-        });
-
-        // Click outside modal to close
-        window.addEventListener('click', (event) => {
-            if (event.target === howToPlayModal) {
-                howToPlayModal.style.display = 'none';
-            }
-            if (event.target === lobbySettingsModal) {
-                lobbySettingsModal.style.display = 'none';
-            }
-        });
-
-        // Initialize
+        // Gestione audio su mobile (richiesta di interazione utente)
         document.addEventListener('click', () => {
-            // This helps with browser autoplay policies
-            audioPlayer.play().catch(e => console.log('Autoplay prevented'));
+            if (audioPlayer.paused && audioPlayer.src) {
+                audioPlayer.play().catch(e => console.log('Autoplay non consentito'));
+            }
         }, { once: true });
     </script>
 </body>

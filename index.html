@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Impostore</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #1a1a2e; color: white; text-align: center; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .panel { background: #16213e; padding: 15px; border-radius: 10px; margin: 10px 0; }
+    input, button { padding: 10px; margin: 5px; border: none; border-radius: 5px; }
+    button { background: #f05454; color: white; cursor: pointer; }
+    #playersList, #votingList { list-style: none; padding: 0; }
+    #playersList li, #votingList li { padding: 8px; margin: 5px 0; background: #0f3460; border-radius: 5px; }
+    #gameSection { display: none; }
+    #timer { font-size: 24px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Lobby -->
+    <div id="lobbySection">
+      <h1>IMPOSTORE</h1>
+      <div class="panel">
+        <button id="createBtn">Crea Stanza</button>
+        <div id="roomCode" style="font-size: 24px; margin: 10px 0;"></div>
+      </div>
+      <div class="panel">
+        <input id="joinCodeInput" placeholder="Codice stanza">
+        <input id="playerNameInput" placeholder="Il tuo nome">
+        <button id="joinBtn">Unisciti</button>
+      </div>
+      <div class="panel">
+        <h3>Giocatori:</h3>
+        <ul id="playersList"></ul>
+        <button id="startBtn" disabled>Avvia Gioco</button>
+      </div>
+    </div>
+
+    <!-- Gioco -->
+    <div id="gameSection">
+      <h2 id="roleText">Ruolo: Normale</h2>
+      <div id="timer">30</div>
+      <audio id="music" controls></audio>
+      <div id="votingSection" style="display: none;">
+        <h3>Vota l'impostore:</h3>
+        <ul id="votingList"></ul>
+        <button id="voteBtn" disabled>Conferma</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===================== BACKEND SIMULATO =====================
+    const fakeBackend = {
+      rooms: {},
+      createRoom() {
+        const code = Math.random().toString(36).substring(2, 6).toUpperCase();
+        this.rooms[code] = { players: [], impostor: null };
+        return code;
+      },
+      joinRoom(code, name) {
+        if (!this.rooms[code]) return false;
+        const id = 'player-' + Math.random().toString(36).substring(2, 9);
+        this.rooms[code].players.push({ id, name });
+        return { id, room: this.rooms[code] };
+      },
+      startGame(code) {
+        const room = this.rooms[code];
+        const impostorIndex = Math.floor(Math.random() * room.players.length);
+        room.impostor = room.players[impostorIndex].id;
+        return room.impostor;
+      }
+    };
+
+    // ===================== FRONTEND =====================
+    let currentRoom = null;
+    let playerId = null;
+    let isImpostor = false;
+
+    // Elementi DOM
+    const lobbySection = document.getElementById('lobbySection');
+    const gameSection = document.getElementById('gameSection');
+    const createBtn = document.getElementById('createBtn');
+    const joinBtn = document.getElementById('joinBtn');
+    const startBtn = document.getElementById('startBtn');
+
+    // Creazione stanza
+    createBtn.addEventListener('click', () => {
+      const code = fakeBackend.createRoom();
+      playerId = 'host-' + Math.random().toString(36).substring(2, 9);
+      currentRoom = code;
+      document.getElementById('roomCode').textContent = `Codice: ${code}`;
+      startBtn.disabled = false;
+      updatePlayersList();
+    });
+
+    // Unione a stanza
+    joinBtn.addEventListener('click', () => {
+      const code = document.getElementById('joinCodeInput').value;
+      const name = document.getElementById('playerNameInput').value;
+      const result = fakeBackend.joinRoom(code, name);
+      if (!result) return alert('Stanza non trovata!');
+      
+      playerId = result.id;
+      currentRoom = code;
+      updatePlayersList();
+    });
+
+    // Avvio gioco
+    startBtn.addEventListener('click', () => {
+      const impostorId = fakeBackend.startGame(currentRoom);
+      isImpostor = playerId === impostorId;
+      
+      lobbySection.style.display = 'none';
+      gameSection.style.display = 'block';
+      document.getElementById('roleText').textContent = 
+        isImpostor ? 'Ruolo: IMPOSTORE!' : 'Ruolo: Normale';
+      
+      startMusic();
+      startTimer();
+    });
+
+    // Funzioni di gioco
+    function startMusic() {
+      const music = document.getElementById('music');
+      music.src = isImpostor ? 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' 
+                            : 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3';
+      music.play();
+    }
+
+    function startTimer() {
+      let time = 30;
+      const timer = setInterval(() => {
+        document.getElementById('timer').textContent = time--;
+        if (time < 0) {
+          clearInterval(timer);
+          startVoting();
+        }
+      }, 1000);
+    }
+
+    function startVoting() {
+      document.getElementById('music').pause();
+      document.getElementById('votingSection').style.display = 'block';
+      // Popola lista voti (semplificata)
+      const room = fakeBackend.rooms[currentRoom];
+      const votingList = document.getElementById('votingList');
+      votingList.innerHTML = room.players
+        .map(p => `<li onclick="selectPlayer('${p.id}')">${p.name}</li>`)
+        .join('');
+    }
+
+    function selectPlayer(id) {
+      voteSelection = id;
+      document.getElementById('voteBtn').disabled = false;
+    }
+
+    // Aggiorna lista giocatori
+    function updatePlayersList() {
+      if (!currentRoom) return;
+      const room = fakeBackend.rooms[currentRoom];
+      const playersList = document.getElementById('playersList');
+      playersList.innerHTML = room.players
+        .map(p => `<li>${p.name}</li>`)
+        .join('');
+    }
+
+    // Esposto alla global scope per l'HTML
+    window.selectPlayer = selectPlayer;
+  </script>
+</body>
+</html>

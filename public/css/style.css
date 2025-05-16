@@ -1,0 +1,100 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.screen {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.form-group {
+    margin: 15px 0;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+#players-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+#players-list li {
+    padding: 8px;
+    background-color: #f9f9f9;
+    margin: 5px 0;
+    border-radius: 4px;
+}
+
+#role-display {
+    font-size: 24px;
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+}
+
+#voting-options {
+    list-style-type: none;
+    padding: 0;
+}
+
+#voting-options li {
+    padding: 10px;
+    margin: 5px 0;
+    background-color: #e9e9e9;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#voting-options li:hover {
+    background-color: #ddd;
+}
+
+#game-audio {
+    width: 100%;
+    margin: 20px 0;
+}

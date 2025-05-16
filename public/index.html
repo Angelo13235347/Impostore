@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'Impostore</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Schermata iniziale -->
+        <div id="home-screen" class="screen">
+            <h1>L'Impostore</h1>
+            <button id="join-room-btn">Accedi a una stanza</button>
+            <button id="create-room-btn">Crea una stanza</button>
+        </div>
+
+        <!-- Schermata creazione stanza -->
+        <div id="create-room-screen" class="screen hidden">
+            <h2>Crea una nuova stanza</h2>
+            <div class="form-group">
+                <label for="rounds">Numero di turni:</label>
+                <input type="number" id="rounds" min="1" max="10" value="3">
+            </div>
+            <div class="form-group">
+                <label for="round-duration">Durata turno (secondi):</label>
+                <input type="number" id="round-duration" min="30" max="300" value="60">
+            </div>
+            <div class="form-group">
+                <label for="player-name">Il tuo nome:</label>
+                <input type="text" id="player-name" placeholder="Inserisci il tuo nome">
+            </div>
+            <button id="generate-room-btn">Genera stanza</button>
+            <button class="back-btn">Indietro</button>
+        </div>
+
+        <!-- Schermata accesso stanza -->
+        <div id="join-room-screen" class="screen hidden">
+            <h2>Accedi a una stanza</h2>
+            <div class="form-group">
+                <label for="room-code">Codice stanza:</label>
+                <input type="text" id="room-code" placeholder="Inserisci il codice">
+            </div>
+            <div class="form-group">
+                <label for="join-player-name">Il tuo nome:</label>
+                <input type="text" id="join-player-name" placeholder="Inserisci il tuo nome">
+            </div>
+            <button id="join-room-confirm-btn">Accedi</button>
+            <button class="back-btn">Indietro</button>
+        </div>
+
+        <!-- Schermata di attesa -->
+        <div id="lobby-screen" class="screen hidden">
+            <h2>Stanza: <span id="room-code-display"></span></h2>
+            <h3>Giocatori:</h3>
+            <ul id="players-list"></ul>
+            <div id="host-controls" class="hidden">
+                <button id="start-game-btn">Avvia partita</button>
+            </div>
+        </div>
+
+        <!-- Schermata di gioco -->
+        <div id="game-screen" class="screen hidden">
+            <h2>Turno <span id="current-round">1</span></h2>
+            <div id="role-display"></div>
+            <audio id="game-audio" controls></audio>
+            <div id="voting-section" class="hidden">
+                <h3>Vota l'impostore:</h3>
+                <ul id="voting-options"></ul>
+                <button id="submit-vote-btn">Conferma voto</button>
+            </div>
+        </div>
+
+        <!-- Schermata risultati -->
+        <div id="results-screen" class="screen hidden">
+            <h2>Risultati</h2>
+            <div id="results-content"></div>
+            <button id="next-round-btn" class="hidden">Prossimo turno</button>
+            <button id="return-to-lobby-btn">Torna alla lobby</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
